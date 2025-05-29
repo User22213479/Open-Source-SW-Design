@@ -56,4 +56,3 @@ class Ai:
 
         target.currentEnergy += 1
         console.append(f">> AI: {target.name}에게 에너지를 부착했습니다.")
-        self.manager.ai_card_export_phase()

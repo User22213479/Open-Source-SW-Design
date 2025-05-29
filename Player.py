@@ -21,6 +21,7 @@ class Player:
                     if getattr(target, "turn_summoned", -1) < self.turn_counter:
                         console.append(f">> {target.name}이(가) {card.name}으로 진화했습니다!")
                         target.evolution(self.deck)
+                        self.manager.restart_export_timer()
                         return True
                     else:
                         console.append(f">> {target.name}은(는) 이번 턴에 소환되어 진화할 수 없습니다.")
@@ -31,11 +32,13 @@ class Player:
                 self.deck.battlePokemon = card
                 card.turn_summoned = self.turn_counter
                 console.append(f">> {card.name}을(를) 배틀 몬스터로 내보냈습니다.")
+                self.manager.restart_export_timer()
                 return True
             elif len(self.deck.BenchPokemons) < 3:
                 self.deck.BenchPokemons.append(card)
                 card.turn_summoned = self.turn_counter
                 console.append(f">> {card.name}을(를) 벤치에 배치했습니다.")
+                self.manager.restart_export_timer()
                 return True
             else:
                 console.append(">> 벤치가 가득 찼습니다.")
@@ -44,6 +47,7 @@ class Player:
         if isinstance(card, ItemCard):
             card.use()
             console.append(f">> 아이템 {card.name}을(를) 사용했습니다.")
+            self.manager.restart_export_timer()
             return True
 
         if isinstance(card, SupportCard):
@@ -53,6 +57,7 @@ class Player:
             card.use()
             self.support_used_this_turn = True
             console.append(f">> 서포트 카드 {card.name}을(를) 사용했습니다.")
+            self.manager.restart_export_timer()
             return True
 
         console.append(">> 해당 카드를 사용할 수 없습니다.")
@@ -60,12 +65,10 @@ class Player:
 
     def attach_energy(self):
         console = self.manager.battlescreen.consoleLog
-        layout = self.manager.battlescreen.button_area_layout  # QHBoxLayout
+        layout = self.manager.battlescreen.button_area_layout
         console.append(">> 에너지를 부착할 대상을 선택하세요.")
-        # 이전 버튼 정리
         self.manager.battlescreen.clear_button_area()
 
-        # 버튼 추가
         if self.deck.battlePokemon:
             btn = QPushButton(self.deck.battlePokemon.name)
             btn.clicked.connect(lambda _, c=self.deck.battlePokemon: self.attach_energy_to(c))
@@ -76,11 +79,10 @@ class Player:
             btn.clicked.connect(lambda _, target=pokemon: self.attach_energy_to(target))
             layout.addWidget(btn)
 
-        # 디버깅용 로그
         console.append(f">> 버튼 개수: {layout.count()}")
 
     def attach_energy_to(self, target):
         target.currentEnergy += 1
         self.manager.battlescreen.consoleLog.append(f">> {target.name}에게 에너지를 부착했습니다. 현재 에너지: {target.currentEnergy}")
         self.manager.battlescreen.clear_button_area()
-        #.manager.player_card_export_phase()
+        self.manager.set_phase("export_card")  # attach_energy 끝나고 export_card 단계로 진입

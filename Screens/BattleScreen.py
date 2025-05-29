@@ -97,6 +97,12 @@ class BattleScreen(QMainWindow, battleForm):
             if item.widget():
                 item.widget().setParent(None)
 
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
+
     def update_field_display(self):
         # 플레이어 배틀 몬스터
         if self.manager.player.deck.battlePokemon:
@@ -148,11 +154,9 @@ class BattleScreen(QMainWindow, battleForm):
             label.setStyleSheet("border: 1px solid black;")
             self.aiBench.addWidget(label)
 
-    def clear_layout(self, layout):
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().setParent(None)
+    def update_export_button_visibility(self):
+        phase = self.manager.phase
+        self.Export_Button.setEnabled(phase in ["game_ready", "export_card"])
 
     def setConsole(self):
         self.consoleLog.setReadOnly(True)
