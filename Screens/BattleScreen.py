@@ -11,6 +11,7 @@ class BattleScreen(QMainWindow, battleForm):
         super().__init__()
         self.setupUi(self)
         self.manager = manager
+        self.button_area_layout = self.buttonArea.layout()
         self.initialize_battle()
         self.Export_Button.clicked.connect(self.on_export_button_clicked)
 
@@ -71,7 +72,6 @@ class BattleScreen(QMainWindow, battleForm):
             return
 
         card = self.selected_card_data
-
         success = self.manager.player.export_card(card)
 
         if success:
@@ -82,7 +82,6 @@ class BattleScreen(QMainWindow, battleForm):
         else:
             self.consoleLog.append(f">> {card.name} 카드를 내보낼 수 없습니다.")
 
-        self.clear_button_area()
         self.selected_card = None
 
     def refresh_card_area(self):
@@ -93,10 +92,10 @@ class BattleScreen(QMainWindow, battleForm):
         self.loadDeck()
 
     def clear_button_area(self):
-        for i in reversed(range(self.button_area.count())):
-            widget = self.button_area.itemAt(i).widget()
-            if widget is not None:
-                widget.setParent(None)
+        while self.button_area_layout.count():
+            item = self.button_area_layout.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
 
     def update_field_display(self):
         # 플레이어 배틀 몬스터
@@ -161,4 +160,3 @@ class BattleScreen(QMainWindow, battleForm):
         self.consoleLog.append("########## Monster Card Game #########")
         self.consoleLog.setAlignment(Qt.AlignLeft)
         self.consoleLog.append(">> Game Start...")
-

@@ -5,9 +5,11 @@ class Card: #기본 카드
         self.img = img
 
 class PokemonCard(Card):
-    def __init__(self,name,img,hp,comeback,weakness,is_default, next_evolution):
+    def __init__(self,name,img,maxHp,comeback,weakness,is_default, next_evolution):
         super().__init__(name, img)
-        self.hp = hp
+        self.maxHp = maxHp
+        self.currentHp = self.maxHp
+        self.currentEnergy = 0
         self.comeback = comeback
         self.weakness = weakness
         self.is_default = is_default

@@ -44,3 +44,16 @@ class Ai:
             return True
 
         return False
+
+    def attach_energy(self):
+        console = self.manager.battlescreen.consoleLog
+        target = self.deck.battlePokemon or (self.deck.BenchPokemons[0] if self.deck.BenchPokemons else None)
+
+        if not target:
+            console.append(">> AI: 에너지를 부착할 대상이 없습니다.")
+            self.manager.ai_card_export_phase()
+            return
+
+        target.currentEnergy += 1
+        console.append(f">> AI: {target.name}에게 에너지를 부착했습니다.")
+        self.manager.ai_card_export_phase()

@@ -1,4 +1,5 @@
 from Cards.Card import PokemonCard, ItemCard, SupportCard
+from PyQt5.QtWidgets import QPushButton
 
 class Player:
     def __init__(self):
@@ -56,3 +57,30 @@ class Player:
 
         console.append(">> 해당 카드를 사용할 수 없습니다.")
         return False
+
+    def attach_energy(self):
+        console = self.manager.battlescreen.consoleLog
+        layout = self.manager.battlescreen.button_area_layout  # QHBoxLayout
+        console.append(">> 에너지를 부착할 대상을 선택하세요.")
+        # 이전 버튼 정리
+        self.manager.battlescreen.clear_button_area()
+
+        # 버튼 추가
+        if self.deck.battlePokemon:
+            btn = QPushButton(self.deck.battlePokemon.name)
+            btn.clicked.connect(lambda _, c=self.deck.battlePokemon: self.attach_energy_to(c))
+            layout.addWidget(btn)
+
+        for pokemon in self.deck.BenchPokemons:
+            btn = QPushButton(pokemon.name)
+            btn.clicked.connect(lambda _, target=pokemon: self.attach_energy_to(target))
+            layout.addWidget(btn)
+
+        # 디버깅용 로그
+        console.append(f">> 버튼 개수: {layout.count()}")
+
+    def attach_energy_to(self, target):
+        target.currentEnergy += 1
+        self.manager.battlescreen.consoleLog.append(f">> {target.name}에게 에너지를 부착했습니다. 현재 에너지: {target.currentEnergy}")
+        self.manager.battlescreen.clear_button_area()
+        #.manager.player_card_export_phase()
