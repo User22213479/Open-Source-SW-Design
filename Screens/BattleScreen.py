@@ -104,51 +104,39 @@ class BattleScreen(QMainWindow, battleForm):
                 item.widget().setParent(None)
 
     def update_field_display(self):
-        # 플레이어 배틀 몬스터
         if self.manager.player.deck.battlePokemon:
             w = self.Player_Battle_Monster.width()
             h = self.Player_Battle_Monster.height()
-            pixmap = QPixmap(self.manager.player.deck.battlePokemon.img).scaled(
-                w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation
-            )
+            pixmap = QPixmap(self.manager.player.deck.battlePokemon.img).scaled(w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
             self.Player_Battle_Monster.setPixmap(pixmap)
             self.Player_Battle_Monster.setScaledContents(True)
             self.Player_Battle_Monster.setAlignment(Qt.AlignCenter)
             self.Player_Battle_Monster.setStyleSheet("border: 1px solid black;")
 
-        # AI 배틀 몬스터
         if self.manager.ai.deck.battlePokemon:
             w = self.Ai_Battle_Monster.width()
             h = self.Ai_Battle_Monster.height()
-            pixmap = QPixmap(self.manager.ai.deck.battlePokemon.img).scaled(
-                w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation
-            )
+            pixmap = QPixmap(self.manager.ai.deck.battlePokemon.img).scaled(w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
             self.Ai_Battle_Monster.setPixmap(pixmap)
             self.Ai_Battle_Monster.setScaledContents(True)
             self.Ai_Battle_Monster.setAlignment(Qt.AlignCenter)
             self.Ai_Battle_Monster.setStyleSheet("border: 1px solid black;")
 
-        # 플레이어 벤치 몬스터들
         self.clear_layout(self.playerBench)
         for card in self.manager.player.deck.BenchPokemons:
             label = QLabel()
             label.setFixedSize(80, 120)
-            pixmap = QPixmap(card.img).scaled(
-                80, 120, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
-            )
+            pixmap = QPixmap(card.img).scaled(80, 120, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             label.setPixmap(pixmap)
             label.setAlignment(Qt.AlignCenter)
             label.setStyleSheet("border: 1px solid black;")
             self.playerBench.addWidget(label)
 
-        # AI 벤치 몬스터들
         self.clear_layout(self.aiBench)
         for card in self.manager.ai.deck.BenchPokemons:
             label = QLabel()
             label.setFixedSize(80, 120)
-            pixmap = QPixmap(card.img).scaled(
-                80, 120, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
-            )
+            pixmap = QPixmap(card.img).scaled(80, 120, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             label.setPixmap(pixmap)
             label.setAlignment(Qt.AlignCenter)
             label.setStyleSheet("border: 1px solid black;")
@@ -164,3 +152,46 @@ class BattleScreen(QMainWindow, battleForm):
         self.consoleLog.append("########## Monster Card Game #########")
         self.consoleLog.setAlignment(Qt.AlignLeft)
         self.consoleLog.append(">> Game Start...")
+
+    def update_attack_retreat_buttons(self):
+        self.clear_button_area()
+        player = self.manager.player
+        mon = player.deck.battlePokemon
+        canAttack = mon.currentEnergy >= mon.skill_a_cost
+        canRetreat = mon.currentEnergy >= mon.comeback and len(player.deck.BenchPokemons) > 0
+        # 공격 버튼 조건
+        if canAttack:
+            attack_btn = QPushButton("공격")
+            attack_btn.clicked.connect(self.show_attack_buttons)
+            self.button_area_layout.addWidget(attack_btn)
+
+        # 후퇴 버튼 조건
+        if canRetreat:
+            retreat_btn = QPushButton("후퇴")
+            retreat_btn.clicked.connect(self.show_retreat_options)
+            self.button_area_layout.addWidget(retreat_btn)
+
+        if not canAttack and not canRetreat:
+            self.consoleLog.append(">> 에너지가 부족해 아무 행동도 할 수 없습니다. 턴을 종료합니다.")
+            self.manager.end_turn()
+
+    def show_attack_buttons(self):
+        self.clear_button_area()
+        player_mon = self.manager.player.deck.battlePokemon
+
+        if player_mon and player_mon.currentEnergy >= player_mon.skill_a_cost:
+            btn1 = QPushButton("기술1")
+            btn1.clicked.connect(lambda: self.manager.player.attack("a"))
+            self.button_area_layout.addWidget(btn1)
+
+        if hasattr(player_mon, "skill_b") and player_mon.currentEnergy >= player_mon.skill_b_cost:
+            btn2 = QPushButton("기술2")
+            btn2.clicked.connect(lambda: self.manager.player.attack("b"))
+            self.button_area_layout.addWidget(btn2)
+
+    def show_retreat_options(self):
+        self.clear_button_area()
+        for idx, bench_pokemon in enumerate(self.manager.player.deck.BenchPokemons):
+            btn = QPushButton(f"{bench_pokemon.name}와 교체")
+            btn.clicked.connect(lambda _, i=idx: self.manager.player.retreat(i))
+            self.button_area_layout.addWidget(btn)

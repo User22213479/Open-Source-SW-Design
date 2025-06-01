@@ -20,6 +20,7 @@ class Player:
                     if getattr(target, "turn_summoned", -1) < self.turn_counter:
                         console.append(f">> {target.name}이(가) {card.name}으로 진화했습니다!")
                         target.evolution(self.deck)
+                        self.manager.battlescreen.update_field_display()
                         self.manager.restart_export_timer()
                         return True
                     else:
@@ -31,12 +32,14 @@ class Player:
                 self.deck.battlePokemon = card
                 card.turn_summoned = self.turn_counter
                 console.append(f">> {card.name}을(를) 배틀 몬스터로 내보냈습니다.")
+                self.manager.battlescreen.update_field_display()
                 self.manager.restart_export_timer()
                 return True
             elif len(self.deck.BenchPokemons) < 3:
                 self.deck.BenchPokemons.append(card)
                 card.turn_summoned = self.turn_counter
                 console.append(f">> {card.name}을(를) 벤치에 배치했습니다.")
+                self.manager.battlescreen.update_field_display()
                 self.manager.restart_export_timer()
                 return True
             else:
@@ -44,18 +47,13 @@ class Player:
                 return False
 
         if isinstance(card, ItemCard):
-            result = None
             try:
                 result = card.use(self.deck)
             except TypeError:
                 try:
                     result = card.use(self.deck.battlePokemon)
                 except TypeError:
-                    try:
-                        result = card.use()
-                    except Exception as e:
-                        console.append(f">> 아이템 사용 실패: {str(e)}")
-                        return False
+                    result = card.use()
             console.append(f">> 아이템 {card.name}을(를) 사용했습니다.")
             if result:
                 console.append(f">> {result}")
@@ -66,18 +64,13 @@ class Player:
             if self.support_used_this_turn:
                 console.append(">> 이번 턴에는 이미 서포트 카드를 사용했습니다.")
                 return False
-            result = None
             try:
                 result = card.use(self.deck)
             except TypeError:
                 try:
                     result = card.use(self.deck.battlePokemon)
                 except TypeError:
-                    try:
-                        result = card.use()
-                    except Exception as e:
-                        console.append(f">> 서포트 카드 사용 실패: {str(e)}")
-                        return False
+                    result = card.use()
             self.support_used_this_turn = True
             console.append(f">> 서포트 카드 {card.name}을(를) 사용했습니다.")
             if result:
@@ -104,10 +97,54 @@ class Player:
             btn.clicked.connect(lambda _, target=pokemon: self.attach_energy_to(target))
             layout.addWidget(btn)
 
-        console.append(f">> 버튼 개수: {layout.count()}")
-
     def attach_energy_to(self, target):
         target.currentEnergy += 1
-        self.manager.battlescreen.consoleLog.append(f">> {target.name}에게 에너지를 부착했습니다. 현재 에너지: {target.currentEnergy}")
+        self.manager.battlescreen.consoleLog.append(
+            f">> {target.name}에게 에너지를 부착했습니다. 현재 에너지: {target.currentEnergy}"
+        )
         self.manager.battlescreen.clear_button_area()
-        self.manager.set_phase("export_card")  # attach_energy 끝나고 export_card 단계로 진입
+        self.manager.set_phase("export_card")
+
+    def attack(self, skill_key):
+        monster = self.deck.battlePokemon
+        enemy = self.manager.ai.deck.battlePokemon
+        console = self.manager.battlescreen.consoleLog
+
+        if skill_key == "a":
+            name, damage = monster.skill_a()
+            cost = monster.skill_a_cost
+        else:
+            name, damage = monster.skill_b()
+            cost = monster.skill_b_cost
+
+        if monster.currentEnergy < cost:
+            console.append(">> 에너지가 부족해 기술을 사용할 수 없습니다.")
+            return
+
+        if monster.weakness == getattr(enemy, 'type', None):
+            damage += 10
+            console.append(">> 약점을 찔러 추가 데미지 +10!")
+
+        enemy.currentHp -= damage
+        console.append(f">> {monster.name}이(가) {name}을 사용해 {enemy.name}에게 {damage} 데미지를 입혔습니다.")
+
+        if enemy.currentHp <= 0:
+            console.append(f">> {enemy.name}이(가) 쓰러졌습니다!")
+            self.manager.handle_knockout()
+        else:
+            self.manager.battlescreen.update_field_display()
+            self.manager.end_turn()
+
+    def retreat(self, bench_index):
+        current = self.deck.battlePokemon
+        bench = self.deck.BenchPokemons
+
+        if bench_index < len(bench):
+            new_battle = bench.pop(bench_index)
+            self.deck.BenchPokemons.append(current)
+            self.deck.battlePokemon = new_battle
+            current.currentEnergy -= current.comeback
+
+            self.manager.battlescreen.consoleLog.append(f">> {current.name}이(가) 후퇴하고 {new_battle.name}이(가) 전투에 나섰습니다.")
+            self.manager.battlescreen.update_field_display()
+            self.manager.end_turn()
