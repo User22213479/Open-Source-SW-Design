@@ -1,59 +1,120 @@
 from .Card import PokemonCard
+import random
 
 class Squirtle(PokemonCard):
     def __init__(self):
-        super().__init__("물거북","images/WaterTypeCardImages/Squirtle.png",60,1,"풀",True,"어니부기")
+        super().__init__("물거북","images/WaterTypeCardImages/Squirtle.png",60,1,"풀",True,"어니거북")
+        self.skill_a_cost = 1
+
     def skill_a(self):
-        pass # 코스트 1 / 물대포 / 20 damage
-    def evolution(self):
-        pass # 어니부기로 진화 / 덱에서 어니부기를 트래쉬
+        return ("물대포", 20)
+
+    def evolution(self, deck):
+        for idx, card in enumerate(deck.cards):
+            if card.name == self.next_evolution:
+                evolved = deck.cards.pop(idx)
+                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
+                evolved.currentEnergy = self.currentEnergy
+                evolved.turn_summoned = self.turn_summoned
+                if deck.battlePokemon == self:
+                    deck.battlePokemon = evolved
+                else:
+                    for i in range(len(deck.BenchPokemons)):
+                        if deck.BenchPokemons[i] == self:
+                            deck.BenchPokemons[i] = evolved
+                            break
+                return
 
 class Wartortle(PokemonCard):
     def __init__(self):
-        super().__init__("어니거북","images/WaterTypeCardImages/Wartortle.png",80,1,"풀", False,"거북왕")
+        super().__init__("어니거북","images/WaterTypeCardImages/Wartortle.png",80,1,"풀", False,"거북킹")
+        self.skill_a_cost = 2
+
     def skill_a(self):
-        pass # 코스트 2 / 스플래시 / 40 damage
-    def evolution(self):
-        pass # 거북왕으로 진화 / 덱에서 거북왕을 트래쉬
+        return ("스플래시", 40)
+
+    def evolution(self, deck):
+        for idx, card in enumerate(deck.cards):
+            if card.name == self.next_evolution:
+                evolved = deck.cards.pop(idx)
+                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
+                evolved.currentEnergy = self.currentEnergy
+                evolved.turn_summoned = self.turn_summoned
+                if deck.battlePokemon == self:
+                    deck.battlePokemon = evolved
+                else:
+                    for i in range(len(deck.BenchPokemons)):
+                        if deck.BenchPokemons[i] == self:
+                            deck.BenchPokemons[i] = evolved
+                            break
+                return
 
 class Blastoise(PokemonCard):
     def __init__(self):
         super().__init__("거북킹","images/WaterTypeCardImages/Blastoise.png",180,3,"풀", False,"None")
+        self.skill_a_cost = 2
+        self.skill_b_cost = 3
+
     def skill_a(self):
-        pass # 코스트 2 / 파도타기 / 40 damage
+        return ("파도타기", 40)
+
     def skill_b(self):
-        pass # 코스트 3 / 하이드로바주카 / 120 damage
+        return ("하이드로바주카", 120)
 
 class Psyduck(PokemonCard):
     def __init__(self):
-        super().__init__("물오리","images/WaterTypeCardImages/Psyduck.png", 60,1,"풀",True,"골덕")
+        super().__init__("물오리","images/WaterTypeCardImages/Psyduck.png", 60,1,"풀",True,"오리킹")
+        self.skill_a_cost = 1
+
     def skill_a(self):
-        pass # 코스트 1 / 두통 / 10 damage
-    def evolution(self):
-        pass # 골덕으로 진화 / 덱에서 골덕을 트래쉬
+        return ("두통", 10)
+
+    def evolution(self, deck):
+        for idx, card in enumerate(deck.cards):
+            if card.name == self.next_evolution:
+                evolved = deck.cards.pop(idx)
+                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
+                evolved.currentEnergy = self.currentEnergy
+                evolved.turn_summoned = self.turn_summoned
+                if deck.battlePokemon == self:
+                    deck.battlePokemon = evolved
+                else:
+                    for i in range(len(deck.BenchPokemons)):
+                        if deck.BenchPokemons[i] == self:
+                            deck.BenchPokemons[i] = evolved
+                            break
+                return
 
 class Golduck(PokemonCard):
     def __init__(self):
         super().__init__("오리킹","images/WaterTypeCardImages/Golduck.png",90,1,"풀",False,"None")
+        self.skill_a_cost = 2
+
     def skill_a(self):
-        pass # 코스트 2 / 아쿠아에지 / 70 damage
+        return ("아쿠아에지", 70)
 
 class Pyukumuku(PokemonCard):
     def __init__(self):
         super().__init__("해삼","images/WaterTypeCardImages/Pyukumuku.png",70,1,"풀",True,"None")
+        self.skill_a_cost = 1
+
     def skill_a(self):
-        pass # 코스트 1 / 물뿌리기 / 30 damage
+        return ("물뿌리기", 30)
 
 class Lapras(PokemonCard):
     def __init__(self):
         super().__init__("라프랄스","images/WaterTypeCardImages/Lapras.png",100,2,"풀",True,"None")
+        self.skill_a_cost = 1
+
     def skill_a(self):
-        pass # 코스트 1 /하이드로펌프 / 20damage / 에너지 3개가 추가로 붙어 있다면 70 데미지를 추가한다.
+        if self.currentEnergy >= 4:
+            return ("하이드로펌프", 90)  # 20 + 70 추가
+        return ("하이드로펌프", 20)
 
 class Articuno(PokemonCard):
     def __init__(self):
         super().__init__("빙새","images/WaterTypeCardImages/Articuno.png",100,1,"풀",True,"None")
+        self.skill_a_cost = 3
+
     def skill_a(self):
-        pass # 코스트 3 / 냉동빔 / 100 / 에너지 2개 감소
-
-
+        return ("냉동빔", 100)

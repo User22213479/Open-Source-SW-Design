@@ -13,12 +13,16 @@ class Ai:
     def export_card(self, card):
         console = self.manager.battlescreen.consoleLog
 
-        if hasattr(card, 'comeback') and not card.is_default:
+        if isinstance(card, PokemonCard) and not card.is_default:
             for target in [self.deck.battlePokemon] + self.deck.BenchPokemons:
-                if target and target.name == card.comeback and getattr(target, "turn_summoned", -1) < self.turn_counter:
-                    console.append(f"[AI] {target.name}이(가) {card.name}으로 진화했습니다.")
-                    target.evolution(self.deck)
-                    return True
+                if target and target.next_evolution == card.name:
+                    if getattr(target, "turn_summoned", -1) < self.turn_counter:
+                        console.append(f"[AI] {target.name}이(가) {card.name}으로 진화했습니다.")
+                        target.evolution(self.deck)
+                        return True
+                    else:
+                        console.append(f"[AI] {target.name}은(는) 이번 턴에 소환되어 진화할 수 없습니다.")
+                        return False
 
         if isinstance(card, PokemonCard) and card.is_default:
             if self.deck.battlePokemon is None:
@@ -31,16 +35,44 @@ class Ai:
                 card.turn_summoned = self.turn_counter
                 console.append(f"[AI] {card.name}을(를) 벤치에 배치했습니다.")
                 return True
+            else:
+                console.append("[AI] 벤치가 가득 찼습니다.")
+                return False
 
         if isinstance(card, ItemCard):
-            card.use()
-            console.append(f"[AI] 아이템 {card.name} 사용")
+            result = None
+            try:
+                result = card.use(self.deck)
+            except TypeError:
+                try:
+                    result = card.use(self.deck.battlePokemon)
+                except TypeError:
+                    try:
+                        result = card.use()
+                    except Exception as e:
+                        console.append(f"[AI] 아이템 사용 실패: {str(e)}")
+                        return False
+            console.append(f"[AI] 아이템 {card.name} 사용: {result}")
             return True
 
-        if isinstance(card, SupportCard) and not self.support_used_this_turn:
-            card.use()
+        if isinstance(card, SupportCard):
+            if self.support_used_this_turn:
+                console.append("[AI] 이번 턴에는 이미 서포트 카드를 사용했습니다.")
+                return False
+            result = None
+            try:
+                result = card.use(self.deck)
+            except TypeError:
+                try:
+                    result = card.use(self.deck.battlePokemon)
+                except TypeError:
+                    try:
+                        result = card.use()
+                    except Exception as e:
+                        console.append(f"[AI] 서포트 카드 사용 실패: {str(e)}")
+                        return False
             self.support_used_this_turn = True
-            console.append(f"[AI] 서포트 {card.name} 사용")
+            console.append(f"[AI] 서포트 {card.name} 사용: {result}")
             return True
 
         return False

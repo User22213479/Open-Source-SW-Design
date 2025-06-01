@@ -14,10 +14,9 @@ class Player:
     def export_card(self, card):
         console = self.manager.battlescreen.consoleLog
 
-        if hasattr(card, 'comeback') and not card.is_default:
-            all_field = [self.deck.battlePokemon] + self.deck.BenchPokemons
-            for target in all_field:
-                if target and target.name == card.comeback:
+        if isinstance(card, PokemonCard) and not card.is_default:
+            for target in [self.deck.battlePokemon] + self.deck.BenchPokemons:
+                if target and target.next_evolution == card.name:
                     if getattr(target, "turn_summoned", -1) < self.turn_counter:
                         console.append(f">> {target.name}이(가) {card.name}으로 진화했습니다!")
                         target.evolution(self.deck)
@@ -45,8 +44,21 @@ class Player:
                 return False
 
         if isinstance(card, ItemCard):
-            card.use()
+            result = None
+            try:
+                result = card.use(self.deck)
+            except TypeError:
+                try:
+                    result = card.use(self.deck.battlePokemon)
+                except TypeError:
+                    try:
+                        result = card.use()
+                    except Exception as e:
+                        console.append(f">> 아이템 사용 실패: {str(e)}")
+                        return False
             console.append(f">> 아이템 {card.name}을(를) 사용했습니다.")
+            if result:
+                console.append(f">> {result}")
             self.manager.restart_export_timer()
             return True
 
@@ -54,9 +66,22 @@ class Player:
             if self.support_used_this_turn:
                 console.append(">> 이번 턴에는 이미 서포트 카드를 사용했습니다.")
                 return False
-            card.use()
+            result = None
+            try:
+                result = card.use(self.deck)
+            except TypeError:
+                try:
+                    result = card.use(self.deck.battlePokemon)
+                except TypeError:
+                    try:
+                        result = card.use()
+                    except Exception as e:
+                        console.append(f">> 서포트 카드 사용 실패: {str(e)}")
+                        return False
             self.support_used_this_turn = True
             console.append(f">> 서포트 카드 {card.name}을(를) 사용했습니다.")
+            if result:
+                console.append(f">> {result}")
             self.manager.restart_export_timer()
             return True
 

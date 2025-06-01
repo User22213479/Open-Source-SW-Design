@@ -62,7 +62,6 @@ class GameManager:
 
         self.set_phase("action_phase")
         self.battlescreen.consoleLog.append(">> AI의 공격/후퇴 단계입니다.")
-        self.prepare_attack_or_retreat()
 
     def set_phase(self, phase_name):
         self.phase = phase_name

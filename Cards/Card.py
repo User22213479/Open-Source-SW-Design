@@ -14,13 +14,7 @@ class PokemonCard(Card):
         self.weakness = weakness
         self.is_default = is_default
         self.next_evolution = next_evolution
-
-    def skill_a(self):
-        pass
-    def skill_b(self):
-        pass
-    def evolution(self, deck):
-        pass # if self.next_evolution != "None":
+        self.turn_summoned = -1  # 소환된 턴 번호 (진화 제한 조건에 사용)
 
 class ItemCard(Card): # 상처약, 몬스터볼, 스피드업
     def __init__(self,name,img):
@@ -33,4 +27,3 @@ class SupportCard(Card): #박사의 연구, 이슬, 민화
         super().__init__(name,img)
     def use(self):
         pass
-
