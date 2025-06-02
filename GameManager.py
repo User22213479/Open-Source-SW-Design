@@ -13,6 +13,7 @@ class GameManager:
         self.ai = Ai()
         self.player.set_manager(self)
         self.ai.set_manager(self)
+        self.totalTurn = 0
         self.InitialSetting()
 
     def InitialSetting(self):
@@ -101,25 +102,22 @@ class GameManager:
             else:
                 self.wait_countdown -= 1
             if self.wait_countdown <= 0:
-                self.battlescreen.consoleLog.append(">> 준비가 완료되었습니다. 게임을 시작합니다.")
-                self.startGame()
+                self.battlescreen.consoleLog.append(">> 동전을 던져 선공을 결정합니다...")
+                self.player_score = 0
+                self.ai_score = 0
+                self.current_turn = 'player'
+                if self.current_turn == 'player':
+                    self.battlescreen.consoleLog.append(">> 당신이 선공입니다!")
+                else:
+                    self.battlescreen.consoleLog.append(">> AI가 선공입니다!")
+                self.battlescreen.consoleLog.append(">> 준비가 완료되었습니다. 3초 뒤 게임을 시작합니다.")
+                QTimer.singleShot(3000,self.game_loop)
             else:
                 QTimer.singleShot(1000, check_player_ready)
         QTimer.singleShot(1000, check_player_ready)
 
     def has_player_basic_monster(self):
         return self.player.deck.battlePokemon is not None
-
-    def startGame(self):
-        self.battlescreen.consoleLog.append(">> 동전을 던져 선공을 결정합니다...")
-        self.player_score = 0
-        self.ai_score = 0
-        self.current_turn = 'player'
-        if self.current_turn == 'player':
-            self.battlescreen.consoleLog.append(">> 당신이 선공입니다!")
-        else:
-            self.battlescreen.consoleLog.append(">> AI가 선공입니다!")
-        self.game_loop()
 
     def game_loop(self):
         if self.player_score >= 3:
@@ -136,6 +134,13 @@ class GameManager:
             self.battlescreen.consoleLog.append(">> 당신의 몬스터가 모두 쓰러졌습니다. AI의 승리입니다! 😢")
             self.battlescreen.update_field_display()
             return
+
+        self.totalTurn +=1
+
+        self.battlescreen.consoleLog.clear()
+        self.battlescreen.consoleLog.setAlignment(Qt.AlignCenter)
+        self.battlescreen.consoleLog.append(f"<{self.totalTurn}번째 턴>")
+        self.battlescreen.consoleLog.setAlignment(Qt.AlignLeft)
         if self.current_turn == 'player':
             self.player_turn()
         else:
@@ -144,6 +149,6 @@ class GameManager:
     def end_turn(self):
         self.current_turn = 'ai' if self.current_turn == 'player' else 'player'
         self.battlescreen.clear_button_area()
-        self.game_loop()
+        QTimer.singleShot(2000,self.game_loop)
 
 gamemanager = GameManager()
