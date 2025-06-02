@@ -32,8 +32,6 @@ class Deck:
         """덱에서 카드를 한 장 뽑습니다."""
         if self.cards:
             return self.cards.pop()
-        else:
-            raise ValueError("No more Card")
 
     def draw_multiple_cards(self, num):
         drawn_cards = []
@@ -56,10 +54,6 @@ class Deck:
                 random.shuffle(self.cards)
 
         return drawn_cards
-
-    def pokemonExport(self, selected_card):
-        pass
-
 
 # 각 덱을 정의하는 예시
 def create_charizard_deck():

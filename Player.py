@@ -19,7 +19,7 @@ class Player:
                 if target and target.next_evolution == card.name:
                     if getattr(target, "turn_summoned", -1) < self.turn_counter:
                         console.append(f">> {target.name}이(가) {card.name}으로 진화했습니다!")
-                        target.evolution(self.deck)
+                        target.evolution(self.deck, card)
                         self.manager.battlescreen.update_field_display()
                         self.manager.restart_export_timer()
                         return True
@@ -47,16 +47,9 @@ class Player:
                 return False
 
         if isinstance(card, ItemCard):
-            try:
-                result = card.use(self.deck)
-            except TypeError:
-                try:
-                    result = card.use(self.deck.battlePokemon)
-                except TypeError:
-                    result = card.use()
+            result = card.use(self.deck)
             console.append(f">> 아이템 {card.name}을(를) 사용했습니다.")
-            if result:
-                console.append(f">> {result}")
+            console.append(f">> {result}")
             self.manager.restart_export_timer()
             return True
 
@@ -109,31 +102,35 @@ class Player:
         monster = self.deck.battlePokemon
         enemy = self.manager.ai.deck.battlePokemon
         console = self.manager.battlescreen.consoleLog
+        name, damage = monster.skill_a() if skill_key == "a" else monster.skill_b()
 
-        if skill_key == "a":
-            name, damage = monster.skill_a()
-            cost = monster.skill_a_cost
-        else:
-            name, damage = monster.skill_b()
-            cost = monster.skill_b_cost
-
-        if monster.currentEnergy < cost:
-            console.append(">> 에너지가 부족해 기술을 사용할 수 없습니다.")
-            return
-
-        if monster.weakness == getattr(enemy, 'type', None):
+        if self.is_weak_against(monster.weakness, enemy.weakness):
             damage += 10
-            console.append(">> 약점을 찔러 추가 데미지 +10!")
+            console.append(">> 약점을 찔러 추가 데미지 + 10!")
 
         enemy.currentHp -= damage
         console.append(f">> {monster.name}이(가) {name}을 사용해 {enemy.name}에게 {damage} 데미지를 입혔습니다.")
 
         if enemy.currentHp <= 0:
             console.append(f">> {enemy.name}이(가) 쓰러졌습니다!")
-            self.manager.handle_knockout()
+            self.manager.ai.deck.battlePokemon = None
+            self.manager.player_score+=1
+            if self.manager.ai.deck.BenchPokemons:
+                new_mon = self.manager.ai.deck.BenchPokemons.pop(0)
+                self.manager.ai.deck.battlePokemon = new_mon
+                console.append(f">> AI의 {new_mon.name}이(가) 전투에 나섭니다!")
+            self.manager.battlescreen.update_field_display()
         else:
             self.manager.battlescreen.update_field_display()
-            self.manager.end_turn()
+
+        self.manager.end_turn()
+
+    def is_weak_against(self, atk_type, def_type):
+        return (
+                (atk_type == "불" and def_type == "풀") or
+                (atk_type == "물" and def_type == "불") or
+                (atk_type == "풀" and def_type == "물")
+        )
 
     def retreat(self, bench_index):
         current = self.deck.battlePokemon

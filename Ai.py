@@ -1,5 +1,4 @@
 from Cards.Card import PokemonCard, ItemCard, SupportCard
-import random
 
 class Ai:
     def __init__(self):
@@ -16,7 +15,7 @@ class Ai:
             for target in [self.deck.battlePokemon] + self.deck.BenchPokemons:
                 if target and target.next_evolution == card.name:
                     if getattr(target, "turn_summoned", -1) < self.turn_counter:
-                        target.evolution(self.deck)
+                        target.evolution(self.deck,card)
                         self.manager.battlescreen.update_field_display()
                         return True
                     else:
@@ -37,10 +36,9 @@ class Ai:
                 return False
 
         if isinstance(card, ItemCard):
-            try:
-                card.use(self.deck)
-            except:
-                pass
+            result = card.use(self.deck)
+            self.manager.battlescreen.consoleLog.append(f">> 아이템 {card.name}을(를) 사용했습니다.")
+            self.manager.battlescreen.consoleLog.append(f">> {result}")
             return True
 
         if isinstance(card, SupportCard):
@@ -70,7 +68,6 @@ class Ai:
         self.manager.battlescreen.consoleLog.append(">> AI의 공격 단계입니다.")
 
     def attach_energy(self):
-        # 배틀 몬스터 우선
         targets = []
         if self.deck.battlePokemon:
             targets.append(self.deck.battlePokemon)
@@ -79,25 +76,52 @@ class Ai:
         if targets:
             targets[0].currentEnergy += 1
 
-        self.manager.set_phase("export_card")
+        self.manager.battlescreen.consoleLog.append(f">>AI가 {targets[0].name}에게 에너지를 붙였습니다.")
 
-    def attack_phase(self, skill_name, damage):
-        attacker = self.deck.battlePokemon
-        defender = self.manager.player.deck.battlePokemon
+    def attack(self):
+        monster = self.deck.battlePokemon
+        enemy = self.manager.player.deck.battlePokemon
         console = self.manager.battlescreen.consoleLog
 
-        if attacker.type == defender.weakness:
+        if not monster or not enemy:
+            self.manager.end_turn()
+            return
+
+        # skill_b 우선
+        if hasattr(monster, "skill_b") and monster.currentEnergy >= getattr(monster, "skill_b_cost", 999):
+            name, damage = monster.skill_b()
+        elif monster.currentEnergy >= getattr(monster, "skill_a_cost"):
+            name, damage = monster.skill_a()
+        else:
+            console.append(">> AI는 사용할 수 있는 기술이 없어 턴을 종료합니다.")
+            self.manager.end_turn()
+            return
+
+        if self.is_weak_against(monster.weakness, enemy.weakness):
             damage += 10
             console.append(">> AI가 약점을 찔렀습니다! 추가 데미지 +10")
 
-        defender.currentHp -= damage
-        console.append(f">> AI의 {attacker.name}이(가) {skill_name}으로 {damage} 데미지를 입혔습니다.")
+        # 공격 실행
+        enemy.currentHp -= damage
+        console.append(f">> AI의 {monster.name}이(가) {name}으로 {enemy.name}에게 {damage} 데미지를 입혔습니다.")
 
-        if defender.currentHp <= 0:
-            console.append(f">> 당신의 {defender.name}이(가) 쓰러졌습니다.")
+        if enemy.currentHp <= 0:
+            console.append(f">> {enemy.name}이(가) 쓰러졌습니다!")
             self.manager.player.deck.battlePokemon = None
             self.manager.ai_score += 1
+
+            # 벤치 포켓몬 자동 소환
+            if self.manager.player.deck.BenchPokemons:
+                new_monster = self.manager.player.deck.BenchPokemons.pop(0)
+                self.manager.player.deck.battlePokemon = new_monster
+                console.append(f">> {new_monster.name}이(가) 전투에 나섭니다.")
 
         self.manager.battlescreen.update_field_display()
         self.manager.end_turn()
 
+    def is_weak_against(self, atk_type, def_type):
+        return (
+            (atk_type == "불" and def_type == "풀") or
+            (atk_type == "물" and def_type == "불") or
+            (atk_type == "풀" and def_type == "물")
+        )

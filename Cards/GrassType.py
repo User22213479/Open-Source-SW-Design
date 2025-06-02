@@ -9,22 +9,6 @@ class Bulbasaur(PokemonCard):
     def skill_a(self):
         return ("덩굴채찍", 40)
 
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
-
 class Ivysaur(PokemonCard):
     def __init__(self):
         super().__init__("이상한풀","images/GrassTypeCardImages/Ivysaur.png",90,2,"불",False,"이상한꽃")
@@ -32,22 +16,6 @@ class Ivysaur(PokemonCard):
 
     def skill_a(self):
         return ("잎날가르기", 60)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Venusaur(PokemonCard):
     def __init__(self):
@@ -59,7 +27,8 @@ class Venusaur(PokemonCard):
         return ("잎날가르기", 60)
 
     def skill_b(self):
-        return ("자이언트 블룸", 100, "heal_self_30")
+        self.currentHp+=30
+        return ("자이언트 블룸", 100)
 
 class Exeggcute(PokemonCard):
     def __init__(self):
@@ -68,22 +37,6 @@ class Exeggcute(PokemonCard):
 
     def skill_a(self):
         return ("씨폭탄", 20)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Exeggutor(PokemonCard):
     def __init__(self):
@@ -105,22 +58,6 @@ class Skiddo(PokemonCard):
         if random.choice([True, False]):
             return ("허찌르기", 40)
         return ("허찌르기", 0)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Gogoat(PokemonCard):
     def __init__(self):

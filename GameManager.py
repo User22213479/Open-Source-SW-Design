@@ -29,6 +29,8 @@ class GameManager:
 
     def player_turn(self):
         self.battlescreen.consoleLog.append(">> 당신의 차례입니다.")
+        self.player.deck.drawCards.append(self.player.deck.draw_card())
+        self.battlescreen.loadDeck()
         self.player.support_used_this_turn = False
         self.player.turn_counter += 1
         self.set_phase("attach_energy")
@@ -36,11 +38,13 @@ class GameManager:
 
     def ai_turn(self):
         self.battlescreen.consoleLog.append(">> AI의 차례입니다.")
+        self.ai.deck.drawCards.append(self.ai.deck.draw_card())
         self.ai.support_used_this_turn = False
         self.ai.turn_counter += 1
         self.ai.attach_energy()
         self.ai.export_card_phase()
-        #self.ai.attack_phase()
+        self.ai.attack()
+
 
     def set_phase(self, phase_name):
         self.phase = phase_name
@@ -110,7 +114,7 @@ class GameManager:
         self.battlescreen.consoleLog.append(">> 동전을 던져 선공을 결정합니다...")
         self.player_score = 0
         self.ai_score = 0
-        self.current_turn = 'ai'
+        self.current_turn = 'player'
         if self.current_turn == 'player':
             self.battlescreen.consoleLog.append(">> 당신이 선공입니다!")
         else:
@@ -126,9 +130,11 @@ class GameManager:
             return
         if (not self.ai.deck.battlePokemon and not self.ai.deck.BenchPokemons):
             self.battlescreen.consoleLog.append(">> AI의 몬스터가 모두 쓰러졌습니다. 당신의 승리입니다! 🎉")
+            self.battlescreen.update_field_display()
             return
         elif (not self.player.deck.battlePokemon and not self.player.deck.BenchPokemons):
             self.battlescreen.consoleLog.append(">> 당신의 몬스터가 모두 쓰러졌습니다. AI의 승리입니다! 😢")
+            self.battlescreen.update_field_display()
             return
         if self.current_turn == 'player':
             self.player_turn()
@@ -137,6 +143,7 @@ class GameManager:
 
     def end_turn(self):
         self.current_turn = 'ai' if self.current_turn == 'player' else 'player'
+        self.battlescreen.clear_button_area()
         self.game_loop()
 
 gamemanager = GameManager()

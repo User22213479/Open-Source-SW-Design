@@ -9,22 +9,6 @@ class Charmander(PokemonCard):
     def skill_a(self):
         return ("불꽃세례", 20)
 
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
-
 class Charmeleon(PokemonCard):
     def __init__(self):
         super().__init__("리짜드","images/FireTypeCardImages/Charmeleon.png", 90, 2,"물",False,"리짜몽")
@@ -32,22 +16,6 @@ class Charmeleon(PokemonCard):
 
     def skill_a(self):
         return ("불꽃의 발톱", 60)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Charizard(PokemonCard):
     def __init__(self):
@@ -69,22 +37,6 @@ class Ponyta(PokemonCard):
     def skill_a(self):
         return ("불꽃", 20)
 
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
-
 class Rapidash(PokemonCard):
     def __init__(self):
         super().__init__("날쌩쌩마","images/FireTypeCardImages/Rapidash.png", 100, 1, "물",False,"None")
@@ -103,22 +55,6 @@ class Salandit(PokemonCard):
         if random.choice([True, False]):
             return ("불꽃엄니", base + 10)
         return ("불꽃엄니", base)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Salazzle(PokemonCard):
     def __init__(self):

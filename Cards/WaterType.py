@@ -9,22 +9,6 @@ class Squirtle(PokemonCard):
     def skill_a(self):
         return ("물대포", 20)
 
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
-
 class Wartortle(PokemonCard):
     def __init__(self):
         super().__init__("어니거북","images/WaterTypeCardImages/Wartortle.png",80,1,"풀", False,"거북킹")
@@ -32,22 +16,6 @@ class Wartortle(PokemonCard):
 
     def skill_a(self):
         return ("스플래시", 40)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Blastoise(PokemonCard):
     def __init__(self):
@@ -68,22 +36,6 @@ class Psyduck(PokemonCard):
 
     def skill_a(self):
         return ("두통", 10)
-
-    def evolution(self, deck):
-        for idx, card in enumerate(deck.cards):
-            if card.name == self.next_evolution:
-                evolved = deck.cards.pop(idx)
-                evolved.currentHp = evolved.maxHp - (self.maxHp - self.currentHp)
-                evolved.currentEnergy = self.currentEnergy
-                evolved.turn_summoned = self.turn_summoned
-                if deck.battlePokemon == self:
-                    deck.battlePokemon = evolved
-                else:
-                    for i in range(len(deck.BenchPokemons)):
-                        if deck.BenchPokemons[i] == self:
-                            deck.BenchPokemons[i] = evolved
-                            break
-                return
 
 class Golduck(PokemonCard):
     def __init__(self):

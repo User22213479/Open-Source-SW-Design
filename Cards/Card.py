@@ -16,6 +16,29 @@ class PokemonCard(Card):
         self.next_evolution = next_evolution
         self.turn_summoned = -1  # 소환된 턴 번호 (진화 제한 조건에 사용)
 
+    def evolution(self, deck, card):
+        evolved = card
+
+        # 받은 데미지 계산
+        damage_taken = self.maxHp - self.currentHp
+        evolved.currentHp = max(evolved.maxHp - damage_taken, 0)
+
+        # 에너지와 턴 정보 유지
+        evolved.currentEnergy = self.currentEnergy
+        evolved.turn_summoned = self.turn_summoned
+
+        # 위치에 따라 교체 (배틀 or 벤치)
+        if deck.battlePokemon is self:
+            deck.battlePokemon = evolved
+        else:
+            for i, p in enumerate(deck.BenchPokemons):
+                if p is self:
+                    deck.BenchPokemons[i] = evolved
+                    break
+
+        return  # 진화 완료 후 종료
+
+
 class ItemCard(Card): # 상처약, 몬스터볼, 스피드업
     def __init__(self,name,img):
         super().__init__(name,img)
